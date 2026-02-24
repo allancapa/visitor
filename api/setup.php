@@ -10,7 +10,7 @@ require_once 'config.php';
 
 try {
     // Check if admin user already exists
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = 'admin' LIMIT 1");
+    $stmt = $pdo->prepare("SELECT user_id FROM user_tbl WHERE username = 'admin' LIMIT 1");
     $stmt->execute();
     $existing = $stmt->fetch();
 
@@ -21,11 +21,13 @@ try {
     // Create admin user with hashed password
     $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
     
-    $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name) VALUES (:username, :password, :full_name)");
+    $stmt = $pdo->prepare("INSERT INTO user_tbl (fullname, username, password, role, status) VALUES (:fullname, :username, :password, :role, :status)");
     $stmt->execute([
+        'fullname' => 'System Administrator',
         'username' => 'admin',
         'password' => $hashedPassword,
-        'full_name' => 'System Administrator'
+        'role' => 'admin',
+        'status' => 'active'
     ]);
 
     jsonResponse([

@@ -9,12 +9,26 @@ if ($id <= 0) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM visitors WHERE id = :id LIMIT 1");
-    $stmt->execute(['id' => $id]);
+    $role = getUserRole();
+    $userId = getUserId();
+
+    $sql = "SELECT v.*, u.fullname AS added_by FROM visitor_tbl v LEFT JOIN user_tbl u ON v.user_id = u.user_id WHERE v.id = :id";
+    $params = ['id' => $id];
+
+    // Staff can only view their own today's visitors
+    if ($role === 'staff') {
+        $sql .= " AND v.user_id = :user_id AND v.visit_date = CURDATE()";
+        $params['user_id'] = $userId;
+    }
+
+    $sql .= " LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $visitor = $stmt->fetch();
 
     if (!$visitor) {
-        jsonResponse(['success' => false, 'message' => 'Visitor not found.'], 404);
+        jsonResponse(['success' => false, 'message' => 'Visitor not found or access denied.'], 404);
     }
 
     jsonResponse(['success' => true, 'visitor' => $visitor]);

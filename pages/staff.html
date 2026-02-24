@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Staff - City Councilor Visitor E-Logbook</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-building"></i>
+      <h4>City Councilor<br>Visitor E-Logbook</h4>
+    </div>
+    <ul class="sidebar-nav">
+      <li class="nav-section">Main</li>
+      <li>
+        <a href="dashboard.html">
+          <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-section">Visitors</li>
+      <li>
+        <a href="visitors.html">
+          <i class="bi bi-people"></i><span>Visitor List</span>
+        </a>
+      </li>
+      <li>
+        <a href="add-visitor.html">
+          <i class="bi bi-person-plus"></i><span>Add Visitor</span>
+        </a>
+      </li>
+      <li class="nav-section" data-role="admin">Management</li>
+      <li data-role="admin">
+        <a href="staff.html" class="active">
+          <i class="bi bi-person-gear"></i><span>Manage Staff</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="user-meta">
+        <div class="user-avatar"><i class="bi bi-person"></i></div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarUserName">User</div>
+          <div class="user-role" id="sidebarUserRole">Admin</div>
+        </div>
+      </div>
+      <a href="#" id="logoutBtn">
+        <i class="bi bi-box-arrow-left"></i><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 class="page-title">Manage Staff</h1>
+      </div>
+      <div class="user-info">
+        <i class="bi bi-person-circle"></i>
+        <span id="userName">Admin</span>
+        <span id="userRoleBadge" class="badge bg-danger ms-1">Admin</span>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <div class="table-card">
+        <div class="table-header">
+          <h5 class="mb-0"><i class="bi bi-person-gear me-2"></i>Staff Members</h5>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staffModal" onclick="openAddStaff()">
+            <i class="bi bi-plus-lg me-1"></i>Add Staff
+          </button>
+        </div>
+        <div class="table-body">
+          <table class="table table-striped" id="staffTable" style="width:100%">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add/Edit Staff Modal -->
+  <div class="modal fade" id="staffModal" tabindex="-1" aria-labelledby="staffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staffModalLabel">Add Staff</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="staffForm" novalidate>
+          <div class="modal-body">
+            <input type="hidden" id="staffUserId">
+
+            <div class="mb-3">
+              <label for="staffFullname" class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="staffFullname" required>
+              <div class="invalid-feedback">Please enter the full name.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="staffUsername" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="staffUsername" required>
+              <div class="invalid-feedback">Please enter a username.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="staffPassword" class="form-label fw-semibold">Password <span class="text-danger" id="pwdRequired">*</span></label>
+              <input type="password" class="form-control" id="staffPassword">
+              <div class="form-text" id="pwdHint">Minimum 6 characters.</div>
+              <div class="invalid-feedback">Password must be at least 6 characters.</div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="staffRole" class="form-label fw-semibold">Role</label>
+                <select class="form-select" id="staffRole">
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="staffStatus" class="form-label fw-semibold">Status</label>
+                <select class="form-select" id="staffStatus">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="staffSubmitBtn">
+              <span id="staffSubmitText">Add Staff</span>
+              <span id="staffSpinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    var dataTable = null;
+    var isEditMode = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var user = checkAuth();
+      if (!user) return;
+
+      // Only admin can access this page
+      if (user.role !== 'admin') {
+        showError('Access denied. Admin only.').then(function () {
+          window.location.href = 'dashboard.html';
+        });
+        return;
+      }
+
+      displayUserInfo();
+      updateSidebarUser(user);
+      loadStaff();
+
+      // Form submit
+      document.getElementById('staffForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isEditMode) {
+          updateStaff();
+        } else {
+          addStaff();
+        }
+      });
+    });
+
+    function updateSidebarUser(user) {
+      var nameEl = document.getElementById('sidebarUserName');
+      var roleEl = document.getElementById('sidebarUserRole');
+      if (nameEl) nameEl.textContent = user.fullname || user.username;
+      if (roleEl) roleEl.textContent = 'Administrator';
+    }
+
+    async function loadStaff() {
+      try {
+        var data = await apiFetch('/get-staff.php');
+        if (data.success) {
+          renderStaff(data.staff);
+        }
+      } catch (err) {
+        showError('Unable to load staff. Make sure your PHP server is running.');
+      }
+    }
+
+    function renderStaff(staffList) {
+      if (dataTable) {
+        dataTable.destroy();
+        dataTable = null;
+      }
+
+      var tbody = document.getElementById('staffBody');
+      var currentUserId = getUser() ? getUser().user_id : 0;
+
+      if (!staffList || staffList.length === 0) {
+        tbody.innerHTML = '';
+      } else {
+        tbody.innerHTML = staffList.map(function (s, index) {
+          var roleBadge = s.role === 'admin'
+            ? '<span class="badge-role-admin">Admin</span>'
+            : '<span class="badge-role-staff">Staff</span>';
+
+          var statusBadge = s.status === 'active'
+            ? '<span class="badge-active">Active</span>'
+            : '<span class="badge-inactive">Inactive</span>';
+
+          var isSelf = s.user_id == currentUserId;
+          var deleteBtn = isSelf 
+            ? '' 
+            : '<button class="btn-action btn-action-danger" title="Delete" onclick="deleteStaff(' + s.user_id + ', \'' + escapeHtml(s.fullname).replace(/'/g, "\\'") + '\')"><i class="bi bi-trash"></i></button>';
+
+          return '<tr>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td><strong>' + escapeHtml(s.fullname) + '</strong>' + (isSelf ? ' <span class="badge bg-secondary ms-1">You</span>' : '') + '</td>' +
+            '<td>' + escapeHtml(s.username) + '</td>' +
+            '<td>' + roleBadge + '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td>' + formatDate(s.date_created) + '</td>' +
+            '<td><div class="d-flex gap-1">' +
+              '<button class="btn-action btn-action-primary" title="Edit" onclick="openEditStaff(' + s.user_id + ')"><i class="bi bi-pencil"></i></button>' +
+              deleteBtn +
+            '</div></td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      dataTable = $('#staffTable').DataTable({
+        pageLength: 25,
+        order: [],
+        language: {
+          emptyTable: 'No staff found.',
+          search: '<i class="bi bi-search"></i>',
+          searchPlaceholder: 'Search staff...'
+        },
+        columnDefs: [
+          { orderable: false, targets: -1 }
+        ]
+      });
+    }
+
+    function openAddStaff() {
+      isEditMode = false;
+      document.getElementById('staffModalLabel').textContent = 'Add Staff';
+      document.getElementById('staffSubmitText').textContent = 'Add Staff';
+      document.getElementById('staffForm').reset();
+      document.getElementById('staffForm').classList.remove('was-validated');
+      document.getElementById('staffUserId').value = '';
+      document.getElementById('staffPassword').required = true;
+      document.getElementById('pwdRequired').style.display = '';
+      document.getElementById('pwdHint').textContent = 'Minimum 6 characters.';
+    }
+
+    async function openEditStaff(userId) {
+      isEditMode = true;
+      document.getElementById('staffModalLabel').textContent = 'Edit Staff';
+      document.getElementById('staffSubmitText').textContent = 'Save Changes';
+      document.getElementById('staffForm').reset();
+      document.getElementById('staffForm').classList.remove('was-validated');
+      document.getElementById('staffPassword').required = false;
+      document.getElementById('pwdRequired').style.display = 'none';
+      document.getElementById('pwdHint').textContent = 'Leave blank to keep current password.';
+
+      try {
+        showLoading('Loading staff info...');
+        var data = await apiFetch('/get-staff.php?id=' + userId);
+        hideLoading();
+
+        if (data.success && data.staff) {
+          var s = data.staff;
+          document.getElementById('staffUserId').value = s.user_id;
+          document.getElementById('staffFullname').value = s.fullname;
+          document.getElementById('staffUsername').value = s.username;
+          document.getElementById('staffRole').value = s.role;
+          document.getElementById('staffStatus').value = s.status;
+
+          var modal = new bootstrap.Modal(document.getElementById('staffModal'));
+          modal.show();
+        } else {
+          showError('Staff not found.');
+        }
+      } catch (err) {
+        hideLoading();
+        showError('Failed to load staff info.');
+      }
+    }
+
+    async function addStaff() {
+      var form = document.getElementById('staffForm');
+      var fullname = document.getElementById('staffFullname').value.trim();
+      var username = document.getElementById('staffUsername').value.trim();
+      var password = document.getElementById('staffPassword').value;
+      var role = document.getElementById('staffRole').value;
+      var status = document.getElementById('staffStatus').value;
+
+      form.classList.add('was-validated');
+
+      if (!fullname || !username || !password) {
+        return;
+      }
+
+      if (password.length < 6) {
+        showWarning('Password must be at least 6 characters.');
+        return;
+      }
+
+      var btn = document.getElementById('staffSubmitBtn');
+      var spinner = document.getElementById('staffSpinner');
+      btn.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        var data = await apiFetch('/add-staff.php', {
+          method: 'POST',
+          body: { fullname: fullname, username: username, password: password, role: role, status: status }
+        });
+
+        if (data.success) {
+          var modal = bootstrap.Modal.getInstance(document.getElementById('staffModal'));
+          if (modal) modal.hide();
+          showSuccess('Staff member added successfully.');
+          loadStaff();
+        } else {
+          showError(data.message || 'Failed to add staff.');
+        }
+      } catch (err) {
+        showError(err.message || 'Failed to add staff.');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+      }
+    }
+
+    async function updateStaff() {
+      var form = document.getElementById('staffForm');
+      var userId = document.getElementById('staffUserId').value;
+      var fullname = document.getElementById('staffFullname').value.trim();
+      var username = document.getElementById('staffUsername').value.trim();
+      var password = document.getElementById('staffPassword').value;
+      var role = document.getElementById('staffRole').value;
+      var status = document.getElementById('staffStatus').value;
+
+      form.classList.add('was-validated');
+
+      if (!fullname || !username) {
+        return;
+      }
+
+      if (password && password.length < 6) {
+        showWarning('Password must be at least 6 characters.');
+        return;
+      }
+
+      var btn = document.getElementById('staffSubmitBtn');
+      var spinner = document.getElementById('staffSpinner');
+      btn.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        var data = await apiFetch('/update-staff.php', {
+          method: 'POST',
+          body: { user_id: parseInt(userId), fullname: fullname, username: username, password: password, role: role, status: status }
+        });
+
+        if (data.success) {
+          var modal = bootstrap.Modal.getInstance(document.getElementById('staffModal'));
+          if (modal) modal.hide();
+          showSuccess('Staff member updated successfully.');
+          loadStaff();
+        } else {
+          showError(data.message || 'Failed to update staff.');
+        }
+      } catch (err) {
+        showError(err.message || 'Failed to update staff.');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+      }
+    }
+
+    function deleteStaff(userId, name) {
+      showConfirm('Delete staff "' + name + '"? This action cannot be undone.', 'Delete Staff').then(function (result) {
+        if (result.isConfirmed) {
+          performDeleteStaff(userId);
+        }
+      });
+    }
+
+    async function performDeleteStaff(userId) {
+      try {
+        showLoading('Deleting staff...');
+        var data = await apiFetch('/delete-staff.php', {
+          method: 'POST',
+          body: { user_id: userId }
+        });
+        hideLoading();
+
+        if (data.success) {
+          showSuccess('Staff member deleted successfully.');
+          loadStaff();
+        } else {
+          showError(data.message || 'Failed to delete staff.');
+        }
+      } catch (err) {
+        hideLoading();
+        showError(err.message || 'Failed to delete staff.');
+      }
+    }
+  </script>
+
+</body>
+</html>

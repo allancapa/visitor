@@ -3,120 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visitors - Visitor Management System</title>
-  <!-- Bootstrap 5 CSS -->
+  <title>Visitors - City Councilor Visitor E-Logbook</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <!-- DataTables CSS -->
+  <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="../css/style.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Sidebar Overlay (mobile) -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <i class="bi bi-shield-check"></i>
-      <h4>VMS Admin</h4>
+      <i class="bi bi-building"></i>
+      <h4>City Councilor<br>Visitor E-Logbook</h4>
     </div>
     <ul class="sidebar-nav">
+      <li class="nav-section">Main</li>
       <li>
         <a href="dashboard.html">
-          <i class="bi bi-grid-1x2"></i>
-          <span>Dashboard</span>
+          <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
         </a>
       </li>
+      <li class="nav-section">Visitors</li>
       <li>
         <a href="visitors.html" class="active">
-          <i class="bi bi-people"></i>
-          <span>Visitors</span>
+          <i class="bi bi-people"></i><span>Visitor List</span>
         </a>
       </li>
       <li>
         <a href="add-visitor.html">
-          <i class="bi bi-person-plus"></i>
-          <span>Add Visitor</span>
+          <i class="bi bi-person-plus"></i><span>Add Visitor</span>
+        </a>
+      </li>
+      <li class="nav-section" data-role="admin">Management</li>
+      <li data-role="admin">
+        <a href="staff.html">
+          <i class="bi bi-person-gear"></i><span>Manage Staff</span>
         </a>
       </li>
     </ul>
     <div class="sidebar-footer">
+      <div class="user-meta">
+        <div class="user-avatar"><i class="bi bi-person"></i></div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarUserName">User</div>
+          <div class="user-role" id="sidebarUserRole">Staff</div>
+        </div>
+      </div>
       <a href="#" id="logoutBtn">
-        <i class="bi bi-box-arrow-left"></i>
-        <span>Logout</span>
+        <i class="bi bi-box-arrow-left"></i><span>Logout</span>
       </a>
     </div>
   </aside>
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Top Bar -->
     <div class="top-bar">
       <div class="d-flex align-items-center gap-3">
         <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
           <i class="bi bi-list"></i>
         </button>
-        <h1 class="page-title">Visitors</h1>
+        <h1 class="page-title">Visitor List</h1>
       </div>
       <div class="user-info">
         <i class="bi bi-person-circle"></i>
-        <span id="userName">Admin</span>
+        <span id="userName">User</span>
+        <span id="userRoleBadge" class="badge bg-info ms-1">Staff</span>
       </div>
     </div>
 
-    <!-- Content Area -->
     <div class="content-area">
+
+      <!-- Print Header (only visible in print) -->
+      <div class="print-header">
+        <h3>City Councilor Office - Visitor E-Logbook</h3>
+        <p>Visitor List - Printed on <span id="printDate"></span></p>
+      </div>
 
       <div class="table-card">
         <div class="table-header">
           <div class="d-flex align-items-center gap-3 flex-wrap">
-            <h5 class="mb-0"><i class="bi bi-people me-2"></i>All Visitors</h5>
-            <div class="input-group" style="max-width: 280px;">
-              <span class="input-group-text bg-light">
-                <i class="bi bi-search text-muted"></i>
-              </span>
-              <input 
-                type="text" 
-                class="form-control" 
-                id="searchInput" 
-                placeholder="Search visitors..."
-                aria-label="Search visitors"
-              >
+            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Visitors</h5>
+            <!-- Admin date filter -->
+            <div class="d-flex align-items-center gap-2" data-role="admin" id="dateFilterWrap">
+              <label for="filterDate" class="form-label mb-0 small fw-semibold">Filter Date:</label>
+              <input type="date" class="form-control form-control-sm" id="filterDate" style="width:auto;">
+              <button class="btn btn-sm btn-outline-secondary" id="clearDateBtn" title="Clear date filter">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </div>
           </div>
-          <a href="add-visitor.html" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Add Visitor
-          </a>
+          <div class="d-flex gap-2 flex-wrap no-print">
+            <button class="btn btn-sm btn-outline-success" id="exportExcelBtn" title="Export to Excel">
+              <i class="bi bi-file-earmark-spreadsheet me-1"></i>Excel
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" id="printBtn" title="Print">
+              <i class="bi bi-printer me-1"></i>Print
+            </button>
+            <a href="add-visitor.html" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-lg me-1"></i>Add Visitor
+            </a>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="table">
+        <div class="table-body">
+          <table class="table table-striped" id="visitorsTable" style="width:100%">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>Visitor Name</th>
+                <th>Contact Number</th>
                 <th>Purpose</th>
-                <th>Person to Visit</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Address</th>
+                <th>Visit Date</th>
+                <th>Visit Time</th>
+                <th>Added By</th>
+                <th class="no-print">Actions</th>
               </tr>
             </thead>
-            <tbody id="visitorsBody">
-              <tr>
-                <td colspan="10">
-                  <div class="empty-state">
-                    <i class="bi bi-inbox d-block"></i>
-                    <h6>No visitors found</h6>
-                    <p>Add your first visitor to get started.</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="visitorsBody"></tbody>
           </table>
         </div>
       </div>
@@ -124,173 +133,186 @@
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-0">
-          <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete visitor <strong id="deleteVisitorName"></strong>? This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-            <i class="bi bi-trash me-1"></i> Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap 5 JS -->
+  <!-- jQuery (required for DataTables) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <!-- Shared JS -->
   <script src="../js/app.js"></script>
 
   <script>
-    var deleteVisitorId = null;
+    var dataTable = null;
+    var allVisitors = [];
 
     document.addEventListener('DOMContentLoaded', function () {
+      var user = checkAuth();
+      if (!user) return;
       displayUserInfo();
+      updateSidebarUser(user);
       loadVisitors();
 
-      // Search with debounce
-      var searchTimeout = null;
-      document.getElementById('searchInput').addEventListener('input', function () {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(function () {
-          loadVisitors();
-        }, 300);
+      // Date filter (admin only)
+      document.getElementById('filterDate').addEventListener('change', function () {
+        loadVisitors();
       });
 
-      // Confirm delete button
-      document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-        if (deleteVisitorId) {
-          performDelete(deleteVisitorId);
-        }
+      document.getElementById('clearDateBtn').addEventListener('click', function () {
+        document.getElementById('filterDate').value = '';
+        loadVisitors();
+      });
+
+      // Export to Excel
+      document.getElementById('exportExcelBtn').addEventListener('click', function () {
+        exportVisitorsToExcel();
+      });
+
+      // Print
+      document.getElementById('printBtn').addEventListener('click', function () {
+        document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        window.print();
       });
     });
 
+    function updateSidebarUser(user) {
+      var nameEl = document.getElementById('sidebarUserName');
+      var roleEl = document.getElementById('sidebarUserRole');
+      if (nameEl) nameEl.textContent = user.fullname || user.username;
+      if (roleEl) roleEl.textContent = user.role === 'admin' ? 'Administrator' : 'Staff';
+    }
+
     async function loadVisitors() {
-      var search = document.getElementById('searchInput').value.trim();
-      var queryStr = search ? '?search=' + encodeURIComponent(search) : '';
+      var filterDate = document.getElementById('filterDate').value;
+      var queryStr = filterDate ? '?date=' + encodeURIComponent(filterDate) : '';
 
       try {
         var data = await apiFetch('/get-visitors.php' + queryStr);
 
         if (data.success) {
+          allVisitors = data.visitors;
           renderVisitors(data.visitors);
         }
       } catch (err) {
-        document.getElementById('visitorsBody').innerHTML =
-          '<tr><td colspan="10" class="text-center text-muted py-4">Unable to load visitors. Make sure your PHP server is running.</td></tr>';
+        showError('Unable to load visitors. Make sure your PHP server is running.');
       }
     }
 
     function renderVisitors(visitors) {
-      var tbody = document.getElementById('visitorsBody');
-
-      if (!visitors || visitors.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10">' +
-          '<div class="empty-state">' +
-          '<i class="bi bi-inbox d-block"></i>' +
-          '<h6>No visitors found</h6>' +
-          '<p>Add your first visitor to get started.</p>' +
-          '</div></td></tr>';
-        return;
+      // Destroy existing DataTable if any
+      if (dataTable) {
+        dataTable.destroy();
+        dataTable = null;
       }
 
-      tbody.innerHTML = visitors.map(function (v, index) {
-        var statusBadge = v.status === 'checked_in'
-          ? '<span class="badge-checked-in">Checked In</span>'
-          : '<span class="badge-checked-out">Checked Out</span>';
+      var tbody = document.getElementById('visitorsBody');
+      var userRole = getUser() ? getUser().role : '';
+      var userId = getUser() ? getUser().user_id : 0;
 
-        var checkoutBtn = v.status === 'checked_in'
-          ? '<button class="btn-action btn-action-success" title="Check Out" onclick="checkoutVisitor(' + v.id + ')">' +
-            '<i class="bi bi-box-arrow-right"></i></button>'
-          : '';
+      if (!visitors || visitors.length === 0) {
+        tbody.innerHTML = '';
+      } else {
+        tbody.innerHTML = visitors.map(function (v, index) {
+          var actions = '';
 
-        return '<tr>' +
-          '<td>' + (index + 1) + '</td>' +
-          '<td><strong>' + escapeHtml(v.name) + '</strong></td>' +
-          '<td>' + escapeHtml(v.email || '---') + '</td>' +
-          '<td>' + escapeHtml(v.phone || '---') + '</td>' +
-          '<td>' + escapeHtml(v.purpose) + '</td>' +
-          '<td>' + escapeHtml(v.person_to_visit) + '</td>' +
-          '<td>' + formatDateTime(v.check_in) + '</td>' +
-          '<td>' + formatDateTime(v.check_out) + '</td>' +
-          '<td>' + statusBadge + '</td>' +
-          '<td>' +
-            '<div class="d-flex gap-1">' +
-              '<a href="edit-visitor.html?id=' + v.id + '" class="btn-action" title="Edit">' +
-                '<i class="bi bi-pencil"></i></a>' +
-              checkoutBtn +
-              '<button class="btn-action btn-action-danger" title="Delete" onclick="openDeleteModal(' + v.id + ', \'' + escapeHtml(v.name).replace(/'/g, "\\'") + '\')">' +
-                '<i class="bi bi-trash"></i></button>' +
-            '</div>' +
-          '</td>' +
-        '</tr>';
-      }).join('');
+          if (userRole === 'admin') {
+            // Admin: edit + delete
+            actions = '<div class="d-flex gap-1">' +
+              '<a href="edit-visitor.html?id=' + v.id + '" class="btn-action btn-action-primary" title="Edit"><i class="bi bi-pencil"></i></a>' +
+              '<button class="btn-action btn-action-danger" title="Delete" onclick="deleteVisitor(' + v.id + ', \'' + escapeHtml(v.visitor_name).replace(/'/g, "\\'") + '\')"><i class="bi bi-trash"></i></button>' +
+            '</div>';
+          } else if (userRole === 'staff' && v.user_id == userId) {
+            // Staff: edit own only
+            actions = '<a href="edit-visitor.html?id=' + v.id + '" class="btn-action btn-action-primary" title="Edit"><i class="bi bi-pencil"></i></a>';
+          } else {
+            actions = '<span class="text-muted small">---</span>';
+          }
+
+          return '<tr>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td><strong>' + escapeHtml(v.visitor_name) + '</strong></td>' +
+            '<td>' + escapeHtml(v.contact_number) + '</td>' +
+            '<td>' + escapeHtml(v.purpose) + '</td>' +
+            '<td>' + escapeHtml(v.address) + '</td>' +
+            '<td>' + formatDate(v.visit_date) + '</td>' +
+            '<td>' + formatTime(v.visit_time) + '</td>' +
+            '<td>' + escapeHtml(v.added_by || '---') + '</td>' +
+            '<td class="no-print">' + actions + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      // Initialize DataTable
+      dataTable = $('#visitorsTable').DataTable({
+        pageLength: 25,
+        order: [],
+        language: {
+          emptyTable: 'No visitors found.',
+          search: '<i class="bi bi-search"></i>',
+          searchPlaceholder: 'Search visitors...'
+        },
+        columnDefs: [
+          { orderable: false, targets: -1 }
+        ]
+      });
     }
 
-    function openDeleteModal(id, name) {
-      deleteVisitorId = id;
-      document.getElementById('deleteVisitorName').textContent = name;
-      var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-      modal.show();
+    function deleteVisitor(id, name) {
+      showConfirm('Delete visitor "' + name + '"? This action cannot be undone.', 'Delete Visitor').then(function (result) {
+        if (result.isConfirmed) {
+          performDelete(id);
+        }
+      });
     }
 
     async function performDelete(id) {
       try {
+        showLoading('Deleting visitor...');
         var data = await apiFetch('/delete-visitor.php', {
           method: 'POST',
-          body: { id: id },
+          body: { id: id }
         });
+        hideLoading();
 
         if (data.success) {
-          showAlert('Visitor deleted successfully.', 'success');
+          showSuccess('Visitor deleted successfully.');
           loadVisitors();
         } else {
-          showAlert(data.message || 'Failed to delete visitor.', 'danger');
+          showError(data.message || 'Failed to delete visitor.');
         }
       } catch (err) {
-        showAlert('Failed to delete visitor.', 'danger');
-      }
-
-      // Close modal
-      var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-      if (modal) modal.hide();
-      deleteVisitorId = null;
-    }
-
-    async function checkoutVisitor(id) {
-      if (!confirm('Check out this visitor?')) return;
-
-      try {
-        var data = await apiFetch('/checkout-visitor.php', {
-          method: 'POST',
-          body: { id: id },
-        });
-
-        if (data.success) {
-          showAlert('Visitor checked out successfully.', 'success');
-          loadVisitors();
-        } else {
-          showAlert(data.message || 'Failed to check out visitor.', 'danger');
-        }
-      } catch (err) {
-        showAlert('Failed to check out visitor.', 'danger');
+        hideLoading();
+        showError(err.message || 'Failed to delete visitor.');
       }
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      var div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function exportVisitorsToExcel() {
+      if (!allVisitors || allVisitors.length === 0) {
+        showWarning('No visitor data to export.');
+        return;
+      }
+
+      var headers = ['#', 'Visitor Name', 'Contact Number', 'Purpose', 'Address', 'Visit Date', 'Visit Time', 'Added By'];
+      var rows = allVisitors.map(function (v, i) {
+        return [
+          i + 1,
+          v.visitor_name,
+          v.contact_number,
+          v.purpose,
+          v.address,
+          v.visit_date,
+          v.visit_time,
+          v.added_by || '---'
+        ];
+      });
+
+      var filterDate = document.getElementById('filterDate').value;
+      var filename = 'visitors' + (filterDate ? '_' + filterDate : '') + '_' + getTodayDate();
+      exportDataToExcel(rows, headers, filename);
+      showToast('Excel file exported successfully!', 'success');
     }
   </script>
 

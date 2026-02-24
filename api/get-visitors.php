@@ -3,30 +3,47 @@ require_once 'config.php';
 requireAuth();
 
 try {
+    $role = getUserRole();
+    $userId = getUserId();
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $date = isset($_GET['date']) ? trim($_GET['date']) : '';
 
-    if (!empty($search)) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM visitors 
-            WHERE name LIKE :search 
-               OR email LIKE :search2 
-               OR phone LIKE :search3 
-               OR purpose LIKE :search4 
-               OR person_to_visit LIKE :search5
-            ORDER BY created_at DESC
-        ");
-        $searchTerm = '%' . $search . '%';
-        $stmt->execute([
-            'search' => $searchTerm,
-            'search2' => $searchTerm,
-            'search3' => $searchTerm,
-            'search4' => $searchTerm,
-            'search5' => $searchTerm
-        ]);
-    } else {
-        $stmt = $pdo->query("SELECT * FROM visitors ORDER BY created_at DESC");
+    $where = [];
+    $params = [];
+
+    // Staff can only see today's visitors that they created
+    if ($role === 'staff') {
+        $where[] = "v.visit_date = CURDATE()";
+        $where[] = "v.user_id = :user_id";
+        $params['user_id'] = $userId;
     }
 
+    // Admin can filter by date
+    if ($role === 'admin' && !empty($date)) {
+        $where[] = "v.visit_date = :visit_date";
+        $params['visit_date'] = $date;
+    }
+
+    // Search filter
+    if (!empty($search)) {
+        $where[] = "(v.visitor_name LIKE :search OR v.contact_number LIKE :search2 OR v.purpose LIKE :search3 OR v.address LIKE :search4)";
+        $searchTerm = '%' . $search . '%';
+        $params['search'] = $searchTerm;
+        $params['search2'] = $searchTerm;
+        $params['search3'] = $searchTerm;
+        $params['search4'] = $searchTerm;
+    }
+
+    $sql = "SELECT v.*, u.fullname AS added_by FROM visitor_tbl v LEFT JOIN user_tbl u ON v.user_id = u.user_id";
+    
+    if (!empty($where)) {
+        $sql .= " WHERE " . implode(" AND ", $where);
+    }
+    
+    $sql .= " ORDER BY v.visit_date DESC, v.visit_time DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $visitors = $stmt->fetchAll();
 
     jsonResponse(['success' => true, 'visitors' => $visitors]);

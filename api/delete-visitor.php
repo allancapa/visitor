@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-requireAuth();
+requireAdmin(); // Only admin can delete visitors
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
@@ -15,7 +15,7 @@ if ($id <= 0) {
 }
 
 try {
-    $stmt = $pdo->prepare("DELETE FROM visitors WHERE id = :id");
+    $stmt = $pdo->prepare("DELETE FROM visitor_tbl WHERE id = :id");
     $stmt->execute(['id' => $id]);
 
     if ($stmt->rowCount() === 0) {

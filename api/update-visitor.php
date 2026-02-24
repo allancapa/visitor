@@ -9,36 +9,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true);
 
 $id = intval($input['id'] ?? 0);
-$name = trim($input['name'] ?? '');
-$email = trim($input['email'] ?? '');
-$phone = trim($input['phone'] ?? '');
+$visitor_name = trim($input['visitor_name'] ?? '');
+$contact_number = trim($input['contact_number'] ?? '');
 $purpose = trim($input['purpose'] ?? '');
-$person_to_visit = trim($input['person_to_visit'] ?? '');
+$address = trim($input['address'] ?? '');
+$visit_date = trim($input['visit_date'] ?? '');
+$visit_time = trim($input['visit_time'] ?? '');
+
+$role = getUserRole();
+$userId = getUserId();
 
 if ($id <= 0) {
     jsonResponse(['success' => false, 'message' => 'Invalid visitor ID.'], 400);
 }
 
-if (empty($name) || empty($purpose) || empty($person_to_visit)) {
-    jsonResponse(['success' => false, 'message' => 'Name, purpose, and person to visit are required.'], 400);
-}
-
-if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonResponse(['success' => false, 'message' => 'Invalid email address.'], 400);
+if (empty($visitor_name) || empty($contact_number) || empty($purpose) || empty($address)) {
+    jsonResponse(['success' => false, 'message' => 'All fields are required.'], 400);
 }
 
 try {
+    // Check ownership for staff
+    if ($role === 'staff') {
+        $check = $pdo->prepare("SELECT id FROM visitor_tbl WHERE id = :id AND user_id = :user_id AND visit_date = CURDATE()");
+        $check->execute(['id' => $id, 'user_id' => $userId]);
+        if (!$check->fetch()) {
+            jsonResponse(['success' => false, 'message' => 'Access denied. You can only edit your own visitors from today.'], 403);
+        }
+        // Staff cannot change the date
+        $visit_date = date('Y-m-d');
+    }
+
+    if (empty($visit_date)) {
+        $visit_date = date('Y-m-d');
+    }
+    if (empty($visit_time)) {
+        $visit_time = date('H:i:s');
+    }
+
     $stmt = $pdo->prepare("
-        UPDATE visitors 
-        SET name = :name, email = :email, phone = :phone, purpose = :purpose, person_to_visit = :person_to_visit
+        UPDATE visitor_tbl 
+        SET visitor_name = :visitor_name, contact_number = :contact_number, purpose = :purpose, 
+            address = :address, visit_date = :visit_date, visit_time = :visit_time
         WHERE id = :id
     ");
     $stmt->execute([
-        'name' => $name,
-        'email' => $email ?: null,
-        'phone' => $phone ?: null,
+        'visitor_name' => $visitor_name,
+        'contact_number' => $contact_number,
         'purpose' => $purpose,
-        'person_to_visit' => $person_to_visit,
+        'address' => $address,
+        'visit_date' => $visit_date,
+        'visit_time' => $visit_time,
         'id' => $id
     ]);
 

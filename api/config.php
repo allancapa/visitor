@@ -50,4 +50,22 @@ function requireAuth() {
         jsonResponse(['success' => false, 'message' => 'Unauthorized. Please log in.'], 401);
     }
 }
+
+// Helper function to check if user is admin
+function requireAdmin() {
+    requireAuth();
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        jsonResponse(['success' => false, 'message' => 'Access denied. Admin only.'], 403);
+    }
+}
+
+// Get current user role
+function getUserRole() {
+    return $_SESSION['role'] ?? '';
+}
+
+// Get current user ID
+function getUserId() {
+    return $_SESSION['user_id'] ?? 0;
+}
 ?>

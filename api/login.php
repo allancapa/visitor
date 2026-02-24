@@ -15,7 +15,7 @@ if (empty($username) || empty($password)) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, password, full_name FROM users WHERE username = :username LIMIT 1");
+    $stmt = $pdo->prepare("SELECT user_id, username, password, fullname, role, status FROM user_tbl WHERE username = :username LIMIT 1");
     $stmt->execute(['username' => $username]);
     $user = $stmt->fetch();
 
@@ -23,18 +23,24 @@ try {
         jsonResponse(['success' => false, 'message' => 'Invalid username or password.'], 401);
     }
 
+    if ($user['status'] !== 'active') {
+        jsonResponse(['success' => false, 'message' => 'Your account has been deactivated. Contact admin.'], 403);
+    }
+
     // Set session
-    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['username'] = $user['username'];
-    $_SESSION['full_name'] = $user['full_name'];
+    $_SESSION['fullname'] = $user['fullname'];
+    $_SESSION['role'] = $user['role'];
 
     jsonResponse([
         'success' => true,
         'message' => 'Login successful.',
         'user' => [
-            'id' => $user['id'],
+            'user_id' => $user['user_id'],
             'username' => $user['username'],
-            'full_name' => $user['full_name']
+            'fullname' => $user['fullname'],
+            'role' => $user['role']
         ]
     ]);
 

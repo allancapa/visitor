@@ -8,32 +8,50 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-$name = trim($input['name'] ?? '');
-$email = trim($input['email'] ?? '');
-$phone = trim($input['phone'] ?? '');
+$visitor_name = trim($input['visitor_name'] ?? '');
+$contact_number = trim($input['contact_number'] ?? '');
 $purpose = trim($input['purpose'] ?? '');
-$person_to_visit = trim($input['person_to_visit'] ?? '');
+$address = trim($input['address'] ?? '');
+$visit_date = trim($input['visit_date'] ?? '');
+$visit_time = trim($input['visit_time'] ?? '');
+
+$role = getUserRole();
+$userId = getUserId();
 
 // Validation
-if (empty($name) || empty($purpose) || empty($person_to_visit)) {
-    jsonResponse(['success' => false, 'message' => 'Name, purpose, and person to visit are required.'], 400);
+if (empty($visitor_name) || empty($contact_number) || empty($purpose) || empty($address)) {
+    jsonResponse(['success' => false, 'message' => 'All fields are required.'], 400);
 }
 
-if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonResponse(['success' => false, 'message' => 'Invalid email address.'], 400);
+// Staff can only add visitors for today
+if ($role === 'staff') {
+    $visit_date = date('Y-m-d'); // Force today's date
+    if (empty($visit_time)) {
+        $visit_time = date('H:i:s');
+    }
+} else {
+    // Admin can set any date
+    if (empty($visit_date)) {
+        $visit_date = date('Y-m-d');
+    }
+    if (empty($visit_time)) {
+        $visit_time = date('H:i:s');
+    }
 }
 
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO visitors (name, email, phone, purpose, person_to_visit, check_in, status) 
-        VALUES (:name, :email, :phone, :purpose, :person_to_visit, NOW(), 'checked_in')
+        INSERT INTO visitor_tbl (visitor_name, contact_number, purpose, address, visit_date, visit_time, user_id) 
+        VALUES (:visitor_name, :contact_number, :purpose, :address, :visit_date, :visit_time, :user_id)
     ");
     $stmt->execute([
-        'name' => $name,
-        'email' => $email ?: null,
-        'phone' => $phone ?: null,
+        'visitor_name' => $visitor_name,
+        'contact_number' => $contact_number,
         'purpose' => $purpose,
-        'person_to_visit' => $person_to_visit
+        'address' => $address,
+        'visit_date' => $visit_date,
+        'visit_time' => $visit_time,
+        'user_id' => $userId
     ]);
 
     $newId = $pdo->lastInsertId();
