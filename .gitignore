@@ -5,6 +5,14 @@ __v0_jsx-dev-runtime.ts
 
 # Common ignores
 node_modules/
-.next/
-.env*.local
 .DS_Store
+
+# PHP
+vendor/
+.env
+.env.local
+*.log
+
+# IDE
+.vscode/
+.idea/

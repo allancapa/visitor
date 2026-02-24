@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Visitor - Visitor Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-shield-check"></i>
+      <h4>VMS Admin</h4>
+    </div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="dashboard.html">
+          <i class="bi bi-grid-1x2"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="visitors.html" class="active">
+          <i class="bi bi-people"></i>
+          <span>Visitors</span>
+        </a>
+      </li>
+      <li>
+        <a href="add-visitor.html">
+          <i class="bi bi-person-plus"></i>
+          <span>Add Visitor</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn">
+        <i class="bi bi-box-arrow-left"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 class="page-title">Edit Visitor</h1>
+      </div>
+      <div class="user-info">
+        <i class="bi bi-person-circle"></i>
+        <span id="userName">Admin</span>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="visitors.html" class="text-decoration-none">Visitors</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Edit Visitor</li>
+        </ol>
+      </nav>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Loading visitor information...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="errorState" class="d-none text-center py-5">
+        <i class="bi bi-exclamation-triangle text-warning d-block" style="font-size: 3rem;"></i>
+        <h5 class="mt-3">Visitor Not Found</h5>
+        <p class="text-muted">The visitor record could not be loaded.</p>
+        <a href="visitors.html" class="btn btn-primary">Back to Visitors</a>
+      </div>
+
+      <!-- Edit Form -->
+      <div class="form-card d-none" id="editFormCard">
+        <h5 class="mb-4">
+          <i class="bi bi-pencil-square me-2 text-primary"></i>
+          Edit Visitor Information
+        </h5>
+
+        <form id="editVisitorForm" novalidate>
+          <input type="hidden" id="visitorId">
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Enter visitor's full name" required>
+              <div class="invalid-feedback">Please enter the visitor's name.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="visitor@example.com">
+              <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone" placeholder="e.g. 09171234567">
+            </div>
+
+            <div class="col-12">
+              <label for="purpose" class="form-label">Purpose of Visit <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="purpose" name="purpose" placeholder="Purpose of visit" required>
+              <div class="invalid-feedback">Please enter the purpose of visit.</div>
+            </div>
+
+            <div class="col-12">
+              <label for="personToVisit" class="form-label">Person to Visit <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="personToVisit" name="personToVisit" placeholder="Name of the person being visited" required>
+              <div class="invalid-feedback">Please enter the person to visit.</div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="bi bi-check-lg me-1"></i>
+              <span id="submitBtnText">Save Changes</span>
+              <span id="submitSpinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </span>
+            </button>
+            <a href="visitors.html" class="btn btn-light">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Shared JS -->
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      displayUserInfo();
+      loadVisitor();
+
+      // Handle form submission
+      document.getElementById('editVisitorForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        var form = this;
+        var id = document.getElementById('visitorId').value;
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var purpose = document.getElementById('purpose').value.trim();
+        var personToVisit = document.getElementById('personToVisit').value.trim();
+
+        // Validation
+        var isValid = true;
+        form.classList.add('was-validated');
+
+        if (!name) isValid = false;
+        if (!purpose) isValid = false;
+        if (!personToVisit) isValid = false;
+        if (email && !isValidEmail(email)) {
+          document.getElementById('email').setCustomValidity('Invalid email');
+          isValid = false;
+        } else {
+          document.getElementById('email').setCustomValidity('');
+        }
+
+        if (!isValid) return;
+
+        // Show loading
+        var btn = document.getElementById('submitBtn');
+        var btnText = document.getElementById('submitBtnText');
+        var spinner = document.getElementById('submitSpinner');
+        btn.disabled = true;
+        btnText.textContent = 'Saving...';
+        spinner.classList.remove('d-none');
+
+        try {
+          var data = await apiFetch('/update-visitor.php', {
+            method: 'POST',
+            body: {
+              id: parseInt(id),
+              name: name,
+              email: email,
+              phone: phone,
+              purpose: purpose,
+              person_to_visit: personToVisit,
+            },
+          });
+
+          if (data.success) {
+            showAlert('Visitor updated successfully!', 'success');
+            setTimeout(function () {
+              window.location.href = 'visitors.html';
+            }, 1000);
+          } else {
+            showAlert(data.message || 'Failed to update visitor.', 'danger');
+          }
+        } catch (err) {
+          showAlert('Unable to connect to server.', 'danger');
+        } finally {
+          btn.disabled = false;
+          btnText.textContent = 'Save Changes';
+          spinner.classList.add('d-none');
+        }
+      });
+    });
+
+    async function loadVisitor() {
+      var id = getUrlParam('id');
+
+      if (!id) {
+        showError();
+        return;
+      }
+
+      try {
+        var data = await apiFetch('/get-visitor.php?id=' + id);
+
+        if (data.success && data.visitor) {
+          var v = data.visitor;
+          document.getElementById('visitorId').value = v.id;
+          document.getElementById('name').value = v.name || '';
+          document.getElementById('email').value = v.email || '';
+          document.getElementById('phone').value = v.phone || '';
+          document.getElementById('purpose').value = v.purpose || '';
+          document.getElementById('personToVisit').value = v.person_to_visit || '';
+
+          // Show form, hide loading
+          document.getElementById('loadingState').classList.add('d-none');
+          document.getElementById('editFormCard').classList.remove('d-none');
+        } else {
+          showError();
+        }
+      } catch (err) {
+        showError();
+      }
+    }
+
+    function showError() {
+      document.getElementById('loadingState').classList.add('d-none');
+      document.getElementById('errorState').classList.remove('d-none');
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+  </script>
+
+</body>
+</html>

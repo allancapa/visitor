@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Visitor - Visitor Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-shield-check"></i>
+      <h4>VMS Admin</h4>
+    </div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="dashboard.html">
+          <i class="bi bi-grid-1x2"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="visitors.html">
+          <i class="bi bi-people"></i>
+          <span>Visitors</span>
+        </a>
+      </li>
+      <li>
+        <a href="add-visitor.html" class="active">
+          <i class="bi bi-person-plus"></i>
+          <span>Add Visitor</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn">
+        <i class="bi bi-box-arrow-left"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 class="page-title">Add Visitor</h1>
+      </div>
+      <div class="user-info">
+        <i class="bi bi-person-circle"></i>
+        <span id="userName">Admin</span>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="visitors.html" class="text-decoration-none">Visitors</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Add New Visitor</li>
+        </ol>
+      </nav>
+
+      <div class="form-card">
+        <h5 class="mb-4">
+          <i class="bi bi-person-plus me-2 text-primary"></i>
+          New Visitor Information
+        </h5>
+
+        <form id="addVisitorForm" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Enter visitor's full name" required>
+              <div class="invalid-feedback">Please enter the visitor's name.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="visitor@example.com">
+              <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone" placeholder="e.g. 09171234567">
+            </div>
+
+            <div class="col-12">
+              <label for="purpose" class="form-label">Purpose of Visit <span class="text-danger">*</span></label>
+              <select class="form-select" id="purpose" name="purpose" required>
+                <option value="">Select purpose...</option>
+                <option value="Meeting">Meeting</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Interview">Interview</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Personal Visit">Personal Visit</option>
+                <option value="Client Visit">Client Visit</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="invalid-feedback">Please select the purpose of visit.</div>
+            </div>
+
+            <div class="col-12" id="otherPurposeGroup" style="display: none;">
+              <label for="otherPurpose" class="form-label">Specify Purpose <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="otherPurpose" name="otherPurpose" placeholder="Please specify...">
+            </div>
+
+            <div class="col-12">
+              <label for="personToVisit" class="form-label">Person to Visit <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="personToVisit" name="personToVisit" placeholder="Name of the person being visited" required>
+              <div class="invalid-feedback">Please enter the person to visit.</div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="bi bi-check-lg me-1"></i>
+              <span id="submitBtnText">Add Visitor</span>
+              <span id="submitSpinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </span>
+            </button>
+            <a href="visitors.html" class="btn btn-light">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Shared JS -->
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      displayUserInfo();
+
+      // Show/hide "Other" purpose field
+      document.getElementById('purpose').addEventListener('change', function () {
+        var otherGroup = document.getElementById('otherPurposeGroup');
+        otherGroup.style.display = this.value === 'Other' ? 'block' : 'none';
+      });
+
+      // Handle form submission
+      document.getElementById('addVisitorForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        var form = this;
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var purposeSelect = document.getElementById('purpose').value;
+        var otherPurpose = document.getElementById('otherPurpose').value.trim();
+        var personToVisit = document.getElementById('personToVisit').value.trim();
+
+        // Determine final purpose
+        var purpose = purposeSelect === 'Other' ? otherPurpose : purposeSelect;
+
+        // Validation
+        var isValid = true;
+        form.classList.add('was-validated');
+
+        if (!name) isValid = false;
+        if (!purposeSelect) isValid = false;
+        if (purposeSelect === 'Other' && !otherPurpose) isValid = false;
+        if (!personToVisit) isValid = false;
+        if (email && !isValidEmail(email)) {
+          document.getElementById('email').setCustomValidity('Invalid email');
+          isValid = false;
+        } else {
+          document.getElementById('email').setCustomValidity('');
+        }
+
+        if (!isValid) return;
+
+        // Show loading
+        var btn = document.getElementById('submitBtn');
+        var btnText = document.getElementById('submitBtnText');
+        var spinner = document.getElementById('submitSpinner');
+        btn.disabled = true;
+        btnText.textContent = 'Adding...';
+        spinner.classList.remove('d-none');
+
+        try {
+          var data = await apiFetch('/add-visitor.php', {
+            method: 'POST',
+            body: {
+              name: name,
+              email: email,
+              phone: phone,
+              purpose: purpose,
+              person_to_visit: personToVisit,
+            },
+          });
+
+          if (data.success) {
+            showAlert('Visitor added successfully!', 'success');
+            // Redirect to visitors list after a short delay
+            setTimeout(function () {
+              window.location.href = 'visitors.html';
+            }, 1000);
+          } else {
+            showAlert(data.message || 'Failed to add visitor.', 'danger');
+          }
+        } catch (err) {
+          showAlert('Unable to connect to server.', 'danger');
+        } finally {
+          btn.disabled = false;
+          btnText.textContent = 'Add Visitor';
+          spinner.classList.add('d-none');
+        }
+      });
+    });
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+  </script>
+
+</body>
+</html>
